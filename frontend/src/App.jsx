@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Search, Loader2, Download, Copy, CheckCircle2, RotateCcw } from 'lucide-react';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
