@@ -55,7 +55,7 @@ function App() {
     
     const clientId = Math.random().toString(36).substring(7);
     
-    const sse = new window.EventSource(`http://localhost:3001/api/scrape/progress?clientId=${clientId}`);
+    const sse = new window.EventSource(`https://email-scraper-a306.onrender.com/api/scrape/progress?clientId=${clientId}`);
     sse.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setProgress(data);
@@ -65,7 +65,7 @@ function App() {
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/scrape', {
+      const response = await fetch('https://email-scraper-a306.onrender.com/api/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, clientId, maxPages: 25 })
