@@ -68,7 +68,7 @@ function App() {
       const response = await fetch('https://email-scraper-a306.onrender.com/api/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, clientId, maxPages: 25 })
+        body: JSON.stringify({ url, clientId, maxPages: 300 })
       });
       
       const result = await response.json();

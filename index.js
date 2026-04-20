@@ -56,7 +56,7 @@ async function scrapePage(targetUrl, baseDomain) {
         const html = response.data;
         const $ = cheerio.load(html);
         
-        $('script, style, noscript').remove();
+        // We previously removed scripts here, but keeping them allows us to find emails in JSON or SEO data.
         
         const internalLinks = new Set();
         $('a').each((i, el) => {
@@ -64,7 +64,7 @@ async function scrapePage(targetUrl, baseDomain) {
             if (href) {
                 try {
                     const resolved = new URL(href, targetUrl).href;
-                    if (new URL(resolved).hostname === baseDomain) {
+                    if (new URL(resolved).hostname.endsWith(baseDomain)) {
                         const withoutHash = resolved.split('#')[0];
                         internalLinks.add(withoutHash);
                     }
@@ -101,7 +101,7 @@ app.post('/api/scrape', async (req, res) => {
         return res.status(400).json({ error: 'Invalid URL format' });
     }
     
-    const baseDomain = startUrl.hostname;
+    const baseDomain = startUrl.hostname.replace(/^www\./, '');
     const visited = new Set();
     const queue = [startUrl.href];
     const allEmails = new Set();
