@@ -12,35 +12,10 @@ function App() {
   const [isScraping, setIsScraping] = useState(false);
   const [progress, setProgress] = useState(null);
   const [emails, setEmails] = useState([]);
-  const [keywords, setKeywords] = useState([]);
-  const [activeKeyword, setActiveKeyword] = useState(null);
   const [error, setError] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
 
-  const extractKeywords = (emailList) => {
-    const domainCounts = {};
-    const prefixCounts = {};
-    
-    emailList.forEach(email => {
-      const parts = email.split('@');
-      if (parts.length !== 2) return;
-      const [prefix, domain] = parts;
-      
-      domainCounts[domain] = (domainCounts[domain] || 0) + 1;
-      prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
-    });
 
-    const kw = [];
-    Object.entries(domainCounts).forEach(([word, count]) => {
-      if (count > 0) kw.push({ word, type: 'domain', count });
-    });
-    Object.entries(prefixCounts).forEach(([word, count]) => {
-      if (count > 0 && word.length > 2) kw.push({ word, type: 'prefix', count });
-    });
-    
-    kw.sort((a, b) => b.count - a.count);
-    return kw.slice(0, 15);
-  };
 
   const startScraping = async (e) => {
     e.preventDefault();
@@ -49,9 +24,7 @@ function App() {
     setIsScraping(true);
     setProgress({ status: 'started', message: 'Connecting to server...' });
     setEmails([]);
-    setKeywords([]);
     setError(null);
-    setActiveKeyword(null);
     
     const clientId = Math.random().toString(36).substring(7);
     
@@ -77,7 +50,6 @@ function App() {
       }
       
       setEmails(result.emails);
-      setKeywords(extractKeywords(result.emails));
       setProgress({ status: 'finished', totalEmails: result.emails.length, scannedPages: result.scannedPages });
     } catch (err) {
       setError(err.message);
@@ -105,9 +77,7 @@ function App() {
     document.body.removeChild(link);
   };
 
-  const filteredEmails = activeKeyword 
-    ? emails.filter(e => e.includes(activeKeyword))
-    : emails;
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -183,34 +153,7 @@ function App() {
             </div>
           )}
 
-          {keywords.length > 0 && (
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-gray-800">Filter Tags</h3>
-                {activeKeyword && (
-                  <button type="button" onClick={() => setActiveKeyword(null)} className="text-xs text-blue-500 flex items-center gap-1 hover:underline">
-                    <RotateCcw size={12} /> Reset
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {keywords.map((kw, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveKeyword(kw.word === activeKeyword ? null : kw.word)}
-                    className={cn(
-                      "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors border",
-                      activeKeyword === kw.word 
-                        ? "bg-blue-600 text-white border-blue-600" 
-                        : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
-                    )}
-                  >
-                    {kw.word} <span className="opacity-60 ml-1">({kw.count})</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+
         </div>
 
         <div className="md:col-span-3">
@@ -219,8 +162,8 @@ function App() {
               
               <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h2 className="font-bold text-gray-800">
-                  {activeKeyword ? `Results for "${activeKeyword}"` : "Extracted Emails"}
-                  <span className="ml-2 text-sm font-normal text-gray-500">({filteredEmails.length})</span>
+                  Extracted Emails
+                  <span className="ml-2 text-sm font-normal text-gray-500">({emails.length})</span>
                 </h2>
                 <button 
                   type="button"
@@ -232,9 +175,9 @@ function App() {
               </div>
 
               <div className="max-h-[600px] overflow-y-auto p-2">
-                {filteredEmails.length > 0 ? (
+                {emails.length > 0 ? (
                   <ul className="space-y-1">
-                    {filteredEmails.map((email, idx) => (
+                    {emails.map((email, idx) => (
                       <li key={idx} className="group flex justify-between items-center px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors">
                         <a href={`mailto:${email}`} className="text-gray-700 group-hover:text-blue-700 font-medium truncate pr-4">
                           {email}
